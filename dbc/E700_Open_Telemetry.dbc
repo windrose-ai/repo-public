@@ -1,0 +1,744 @@
+// Windrose E700 — Open Telemetry CAN Database / 开放遥测数据库
+// SPDX-License-Identifier: Apache-2.0
+//
+// WHAT THIS IS / 这是什么
+//   The read channel only: signals the vehicle broadcasts about its own state.
+//   仅读通道：车辆广播的自身状态信号。
+//
+// WHAT IS DELIBERATELY NOT HERE / 刻意不包含的内容
+//   - Command messages (torque / speed / gear / gate commands)  控制指令报文
+//   - Diagnostic services, security access, flashing            诊断服务、安全访问、刷写
+//   - Checksum and rolling-counter definitions                  校验和与滚动计数定义
+//   - Third-party supplier diagnostic specifications            外购件供应商诊断规范
+//   Reading a vehicle never changes it. Commanding one does. This file is the read half.
+//   读一台车不会改变它，命令它会。本文件只是读的那一半。
+//
+// Vehicle: Windrose E700 heavy electric tractor platform
+// Buses:   classic CAN 500 kbit/s and CAN FD (500k arbitration / 2 Mbit/s data)
+// Source:  E700 platform communication matrix
+//
+// Interfaces are read-only by design. Configure any tool in listen-only / silent mode.
+
+VERSION "E700 Open Telemetry"
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_DEF_DEF_REL_
+	BU_SG_REL_
+	BU_EV_REL_
+	BU_BO_REL_
+	SG_MUL_VAL_
+
+BS_:
+
+BU_: CDCU EBS MCU1 MCU2 MCU3 MCU4 PDU TCU_A VDC
+
+BO_ 2550212468 MCU1_VDC_Msg1: 8 MCU1
+ SG_ MCU1_Motor_rotation_direction : 12|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU1_DampedControl : 13|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU1_discharge_state : 14|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ MCU1_Motor1_speed : 16|16@1+ (0.5,-16000) [-16000|16000] "rpm"  VDC,TCU_B
+ SG_ MCU1_Motor1_speed_torque : 32|16@1+ (0.1,-3000) [-3000|3000] "Nm"  VDC,TCU_B
+ SG_ MCU1_Available_torque_limit : 48|8@1+ (5,-600) [-600|600] "Nm"  VDC,TCU_B
+ SG_ MCU1_Motor1_state : 56|4@1+ (1,0) [0|15] ""  VDC,TCU_B
+ SG_ MCU1_Motor1_failure_class : 60|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ MCU1_IGBT_state : 62|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU1_HVLoopStas : 63|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+
+BO_ 2550278004 MCU1_VDC_Msg2: 8 MCU1
+ SG_ MCU1_Input_high_voltage : 12|12@1+ (0.5,0) [0|2047.5] "V"  VDC
+ SG_ MCU1_AC_phase_current : 24|12@1+ (0.5,-1024) [-1024|1023.5] "A"  VDC
+ SG_ MCU1_Motor1_ASC_Mode : 36|1@1+ (1,0) [0|1] ""  VDC
+ SG_ MCU1_Motor1_Temp : 40|8@1+ (1,-40) [-40|215] "degC"  VDC
+ SG_ MCU1_MCU1_Temp : 48|8@1+ (1,-40) [-40|215] "degC"  VDC
+ SG_ MCU1_Motor1_fault_list : 56|8@1+ (1,0) [0|255] ""  VDC
+
+BO_ 2550343540 MCU1_VDC_Msg3: 8 MCU1
+ SG_ MCU1_Peak_power : 0|16@1+ (0.025,0) [0|1638] "kW"  VDC
+ SG_ MCU1_Peak_torque : 16|16@1+ (1,-30000) [-30000|30000] "Nm"  VDC
+ SG_ MCU1_Peak_speed : 32|16@1+ (0.5,-16000) [-16000|16000] "rpm"  VDC
+ SG_ MCU1HVDCCurrent : 48|16@1+ (1,-30000) [-30000|30000] "A"  VDC
+
+BO_ 2550409076 MCU1_VDC_Msg4: 8 MCU1
+ SG_ MCU1_software_version : 0|8@1+ (1,0) [0|255] ""  VDC
+ SG_ MCU1_hardware_version : 8|8@1+ (1,0) [0|255] ""  VDC
+ SG_ MCU1_CoolingWater_Temp : 16|8@1+ (1,-40) [-40|215] "degC"  VDC
+
+BO_ 2550212469 MCU2_VDC_Msg1: 8 MCU2
+ SG_ MCU2_Motor_rotation_direction : 12|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU2_DampedControl : 13|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU2_discharge_state : 14|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ MCU2_Motor2_speed : 16|16@1+ (0.5,-16000) [-16000|16000] "rpm"  VDC,TCU_B
+ SG_ MCU2_Motor2_speed_torque : 32|16@1+ (0.1,-3000) [-3000|3000] "Nm"  VDC,TCU_B
+ SG_ MCU2_Available_torque_limit : 48|8@1+ (5,-600) [-600|600] "Nm"  VDC,TCU_B
+ SG_ MCU2_Motor2_state : 56|4@1+ (1,0) [0|15] ""  VDC,TCU_B
+ SG_ MCU2_Motor2_failure_class : 60|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ MCU2_IGBT_state : 62|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU2_HVLoopStas : 63|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+
+BO_ 2550278005 MCU2_VDC_Msg2: 8 MCU2
+ SG_ MCU2_Input_high_voltage : 12|12@1+ (0.5,0) [0|2047.5] "V"  VDC
+ SG_ MCU2_AC_phase_current : 24|12@1+ (0.5,-1024) [-1024|1023.5] "A"  VDC
+ SG_ MCU2_Motor2_ASC_Mode : 36|1@1+ (1,0) [0|1] ""  VDC
+ SG_ MCU2_Motor2_Temp : 40|8@1+ (1,-40) [-40|215] "degC"  VDC
+ SG_ MCU2_MCU2_Temp : 48|8@1+ (1,-40) [-40|215] "degC"  VDC
+ SG_ MCU2_Motor2_fault_list : 56|8@1+ (1,0) [0|255] ""  VDC
+
+BO_ 2550343541 MCU2_VDC_Msg3: 8 MCU2
+ SG_ MCU2_Peak_power : 0|16@1+ (0.025,0) [0|1638] "kW"  VDC
+ SG_ MCU2_Peak_torque : 16|16@1+ (1,-30000) [-30000|30000] "Nm"  VDC
+ SG_ MCU2_Peak_speed : 32|16@1+ (0.5,-16000) [-16000|16000] "rpm"  VDC
+ SG_ MCU2HVDCCurrent : 48|16@1+ (1,-30000) [-30000|30000] "A"  VDC
+
+BO_ 2550409077 MCU2_VDC_Msg4: 8 MCU2
+ SG_ MCU2_software_version : 0|8@1+ (1,0) [0|255] ""  VDC
+ SG_ MCU2_hardware_version : 8|8@1+ (1,0) [0|255] ""  VDC
+ SG_ MCU2_CoolingWater_Temp : 16|8@1+ (1,-40) [-40|215] "degC"  VDC
+
+BO_ 2550212470 MCU3_VDC_Msg1: 8 MCU3
+ SG_ MCU3_Motor_rotation_direction : 12|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU3_DampedControl : 13|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU3_discharge_state : 14|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ MCU3_Motor3_speed : 16|16@1+ (0.5,-16000) [-16000|16000] "rpm"  VDC,TCU_B
+ SG_ MCU3_Motor3_speed_torque : 32|16@1+ (0.1,-3000) [-3000|3000] "Nm"  VDC,TCU_B
+ SG_ MCU3_Available_torque_limit : 48|8@1+ (5,-600) [-600|600] "Nm"  VDC,TCU_B
+ SG_ MCU3_Motor3_state : 56|4@1+ (1,0) [0|15] ""  VDC,TCU_B
+ SG_ MCU3_Motor3_failure_class : 60|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ MCU3_IGBT_state : 62|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU3_HVLoopStas : 63|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+
+BO_ 2550278006 MCU3_VDC_Msg2: 8 MCU3
+ SG_ MCU3_Input_high_voltage : 12|12@1+ (0.5,0) [0|2047.5] "V"  VDC
+ SG_ MCU3_AC_phase_current : 24|12@1+ (0.5,-1024) [-1024|1023.5] "A"  VDC
+ SG_ MCU3_Motor3_ASC_Mode : 36|1@1+ (1,0) [0|1] ""  VDC
+ SG_ MCU3_Motor3_Temp : 40|8@1+ (1,-40) [-40|215] "degC"  VDC
+ SG_ MCU3_MCU3_Temp : 48|8@1+ (1,-40) [-40|215] "degC"  VDC
+ SG_ MCU3_Motor3_fault_list : 56|8@1+ (1,0) [0|255] ""  VDC
+
+BO_ 2550343542 MCU3_VDC_Msg3: 8 MCU3
+ SG_ MCU3_Peak_power : 0|16@1+ (0.025,0) [0|1638] "kW"  VDC
+ SG_ MCU3_Peak_torque : 16|16@1+ (1,-30000) [-30000|30000] "Nm"  VDC
+ SG_ MCU3_Peak_speed : 32|16@1+ (0.5,-16000) [-16000|16000] "rpm"  VDC
+ SG_ MCU3HVDCCurrent : 48|16@1+ (1,-30000) [-30000|30000] "A"  VDC
+
+BO_ 2550409078 MCU3_VDC_Msg4: 8 MCU3
+ SG_ MCU3_software_version : 0|8@1+ (1,0) [0|255] ""  VDC
+ SG_ MCU3_hardware_version : 8|8@1+ (1,0) [0|255] ""  VDC
+ SG_ MCU3_CoolingWater_Temp : 16|8@1+ (1,-40) [-40|215] "degC"  VDC
+
+BO_ 2550212471 MCU4_VDC_Msg1: 8 MCU4
+ SG_ MCU4_Motor_rotation_direction : 12|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU4_DampedControl : 13|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU4_discharge_state : 14|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ MCU4_Motor4_speed : 16|16@1+ (0.5,-16000) [-16000|16000] "rpm"  VDC,TCU_B
+ SG_ MCU4_Motor4_speed_torque : 32|16@1+ (0.1,-3000) [-3000|3000] "Nm"  VDC,TCU_B
+ SG_ MCU4_Available_torque_limit : 48|8@1+ (5,-600) [-600|600] "Nm"  VDC,TCU_B
+ SG_ MCU4_Motor4_state : 56|4@1+ (1,0) [0|15] ""  VDC,TCU_B
+ SG_ MCU4_Motor4_failure_class : 60|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ MCU4_IGBT_state : 62|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ MCU4_HVLoopStas : 63|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+
+BO_ 2550278007 MCU4_VDC_Msg2: 8 MCU4
+ SG_ MCU4_Input_high_voltage : 12|12@1+ (0.5,0) [0|2047.5] "V"  VDC
+ SG_ MCU4_AC_phase_current : 24|12@1+ (0.5,-1024) [-1024|1023.5] "A"  VDC
+ SG_ MCU4_Motor4_ASC_Mode : 36|1@1+ (1,0) [0|1] ""  VDC
+ SG_ MCU4_Motor4_Temp : 40|8@1+ (1,-40) [-40|215] "degC"  VDC
+ SG_ MCU4_MCU4_Temp : 48|8@1+ (1,-40) [-40|215] "degC"  VDC
+ SG_ MCU4_Motor4_fault_list : 56|8@1+ (1,0) [0|255] ""  VDC
+
+BO_ 2550343543 MCU4_VDC_Msg3: 8 MCU4
+ SG_ MCU4_Peak_power : 0|16@1+ (0.025,0) [0|1638] "kW"  VDC
+ SG_ MCU4_Peak_torque : 16|16@1+ (1,-30000) [-30000|30000] "Nm"  VDC
+ SG_ MCU4_Peak_speed : 32|16@1+ (0.5,-16000) [-16000|16000] "rpm"  VDC
+ SG_ MCU4HVDCCurrent : 48|16@1+ (1,-30000) [-30000|30000] "A"  VDC
+
+BO_ 2550409079 MCU4_VDC_Msg4: 8 MCU4
+ SG_ MCU4_software_version : 0|8@1+ (1,0) [0|255] ""  VDC
+ SG_ MCU4_hardware_version : 8|8@1+ (1,0) [0|255] ""  VDC
+ SG_ MCU4_CoolingWater_Temp : 16|8@1+ (1,-40) [-40|215] "degC"  VDC
+
+BO_ 2550212355 TCU_A_VDC_Msg1: 8 TCU_A
+ SG_ TCU1_Motor_Control_Mode : 12|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ Motor2_Control_Mode : 14|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ TCU1_target_torque : 16|16@1+ (0.1,-3000) [-3000|3000] "Nm"  VDC,TCU_B
+ SG_ TCU1_target_speed : 32|16@1+ (0.5,-16000) [-16000|16000] "rpm"  VDC,TCU_B
+ SG_ TCU_A_Selfcheck_status : 48|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ TCU_A_Dormant_status : 50|1@1+ (1,0) [0|1] ""  VDC,TCU_B
+ SG_ TCU1_Self_learning_mode : 52|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ TCU2_Self_learning_mode : 54|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ Position_Comnd_Ctr_1 : 56|8@1+ (0.02,0) [0|5.1] "V"  VDC,TCU_B
+
+BO_ 2550277891 TCU_A_VDC_Msg2: 8 TCU_A
+ SG_ TCU1_Shift_In_Process_Flag : 12|2@1+ (1,0) [0|3] ""  VDC,MCU1,MCU2,MCU3,MCU4,TCU_B
+ SG_ TCU1_TCU_Allow_Shift : 14|2@1+ (1,0) [0|3] ""  VDC,MCU1,MCU2,MCU3,MCU4,TCU_B
+ SG_ TCU1_Target_gear : 16|2@1+ (1,0) [0|3] ""  VDC,MCU1,MCU2,MCU3,MCU4,TCU_B
+ SG_ TCU1_Shift_Status : 18|3@1+ (1,0) [0|7] ""  VDC,MCU1,MCU2,MCU3,MCU4,TCU_B
+ SG_ TCU2_Shift_Status : 21|3@1+ (1,0) [0|7] ""  VDC,MCU1,MCU2,MCU3,MCU4,TCU_B
+ SG_ TCU2_Shift_In_Process_Flag : 26|2@1+ (1,0) [0|3] ""  VDC,MCU1,MCU2,MCU3,MCU4,TCU_B
+ SG_ TCU2_TCU_Allow_Shift : 28|2@1+ (1,0) [0|3] ""  VDC,MCU1,MCU2,MCU3,MCU4,TCU_B
+ SG_ TCU2_Target_gear : 30|2@1+ (1,0) [0|3] ""  VDC,MCU1,MCU2,MCU3,MCU4,TCU_B
+ SG_ TCU1_Gearbox1_fault_list1 : 32|16@1+ (1,0) [0|65535] ""  VDC,MCU1,MCU2,MCU3,MCU4,TCU_B
+ SG_ TCU2_Gearbox2_fault_list1 : 48|16@1+ (1,0) [0|65535] ""  VDC,MCU1,MCU2,MCU3,MCU4,TCU_B
+
+BO_ 2550343427 TCU_A_VDC_Msg3: 8 TCU_A
+ SG_ TCU1_Failure_Level : 12|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ TCU1_Current_gear_Selflearning : 14|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ TCU_A_Transmission_gear_mode : 16|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ TCU1_Current_gear : 18|4@1+ (1,0) [0|15] ""  VDC,TCU_B
+ SG_ TCU2_Failure_Level : 22|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ TCU1_Output_Rhaft_Rpeed : 24|12@1+ (0.5,-1000) [-1000|1000] "rpm"  VDC,TCU_B
+ SG_ TCU2_Current_gear_Selflearning : 36|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ TCU2_Current_gear : 38|2@1+ (1,0) [0|3] ""  VDC,TCU_B
+ SG_ GearShift_Motor_1_current_Out : 40|16@1+ (0.001,0) [0|65.535] "A"  VDC,TCU_B
+ SG_ GearShift_Position_Out_1 : 56|8@1+ (0.02,0) [0|5.1] "V"  VDC,TCU_B
+
+BO_ 2550408963 TCU_A_VDC_Msg4: 8 Vector__XXX
+ SG_ GearShift_Motor_2_current_Out : 48|16@1+ (0.001,0) [0|65.535] "A" Vector__XXX
+ SG_ TCU2_target_speed : 32|16@1+ (0.5,-16000) [-16000|16000] "rpm" Vector__XXX
+ SG_ TCU2_target_torque : 16|16@1+ (0.1,-3000) [-3000|3000] "Nm" Vector__XXX
+
+BO_ 2550474499 TCU_A_VDC_Msg5: 8 Vector__XXX
+ SG_ TCU_Self_learning_Status : 32|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ GearShift_Position_Out_2 : 24|8@1+ (0.02,0) [0|5.1] "V" Vector__XXX
+ SG_ Position_Comnd_Ctr_2 : 16|8@1+ (0.02,0) [0|5.1] "V" Vector__XXX
+
+BO_ 2550212356 TCU_B_VDC_Msg1: 8 Vector__XXX
+ SG_ Position_Comnd_Ctr_3 : 56|8@1+ (0.02,0) [0|5.1] "V" Vector__XXX
+ SG_ TCU4_Self_learning_mode : 54|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU3_Self_learning_mode : 52|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU_B_Dormant_status : 50|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ TCU_B_Selfcheck_status : 48|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU3_target_speed : 32|16@1+ (0.5,-16000) [-16000|16000] "rpm" Vector__XXX
+ SG_ TCU3_target_torque : 16|16@1+ (0.1,-3000) [-3000|3000] "Nm" Vector__XXX
+ SG_ Motor4_Control_Mode : 14|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ Motor3_Control_Mode : 12|2@1+ (1,0) [0|3] "" Vector__XXX
+
+BO_ 2550277892 TCU_B_VDC_Msg2: 8 Vector__XXX
+ SG_ TCU4_Gearbox2_fault_list4 : 48|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ TCU3_Gearbox1_fault_list3 : 32|16@1+ (1,0) [0|65535] "" Vector__XXX
+ SG_ TCU4_Target_gear : 30|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU4_TCU_Allow_Shift : 28|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU4_Shift_In_Process_Flag : 26|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU4_Shift_Status : 21|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ TCU3_Shift_Status : 18|3@1+ (1,0) [0|7] "" Vector__XXX
+ SG_ TCU3_Target_gear : 16|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU3_TCU_Allow_Shift : 14|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU3_Shift_In_Process_Flag : 12|2@1+ (1,0) [0|3] "" Vector__XXX
+
+BO_ 2550343428 TCU_B_VDC_Msg3: 8 Vector__XXX
+ SG_ GearShift_Position_Out_4 : 56|8@1+ (0.02,0) [0|5.1] "V" Vector__XXX
+ SG_ Position_Comnd_Ctr_4 : 48|8@1+ (0.02,0) [0|5.1] "V" Vector__XXX
+ SG_ TCU4_target_speed : 32|16@1+ (0.5,-16000) [-16000|16000] "rpm" Vector__XXX
+ SG_ TCU4_target_torque : 16|16@1+ (0.1,-3000) [-3000|3000] "Nm" Vector__XXX
+
+BO_ 2550408964 TCU_B_VDC_Msg4: 8 Vector__XXX
+ SG_ GearShift_Motor_3_current_Out : 40|16@1+ (0.001,0) [0|65.535] "A" Vector__XXX
+ SG_ GearShift_Position_Out_3 : 56|8@1+ (0.02,0) [0|5.1] "V" Vector__XXX
+ SG_ TCU4_Current_gear : 38|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU4_Current_gear_Selflearning : 36|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU_B_Output_Rhaft_Rpeed : 24|12@1+ (0.5,-1000) [-1000|1000] "rpm" Vector__XXX
+ SG_ TCU4_Failure_Level : 22|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU3_Current_gear : 18|4@1+ (1,0) [0|15] "" Vector__XXX
+ SG_ TCU_B_Transmission_gear_mode : 16|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU3_Current_gear_Selflearning : 14|2@1+ (1,0) [0|3] "" Vector__XXX
+ SG_ TCU3_Failure_Level : 12|2@1+ (1,0) [0|3] "" Vector__XXX
+
+BO_ 2550540036 TCU_B_VDC_Msg6: 8 Vector__XXX
+ SG_ GearShift_Motor_4_current_Out : 16|16@1+ (0.001,0) [0|65.535] "A" Vector__XXX
+
+BO_ 2566844672 VDC_CCVS: 8 VDC
+ SG_ Parking_brake_switch : 2|2@1+ (1,0) [0|3] ""  CDCU,BDCU,ELC,EBS,EBS_W,EBS_K,ADCU,TGW
+ SG_ Wheel_based_vehicle_speed : 8|16@1+ (0.00390625,0) [0|250.99609375] "km/h"  CMS_L,CMS_R,HUD,CDCU,IPC,BDCU,ESCL,SJBUP,SJBUN,ADBL,ADBR,DCM,ECAS,ELC,VTDR,EPB,EPB_T,EBS,EBS_W,EBS_K,TPMS_F,TPMS_R,TPMS_Trailer,AC,ADCU,MCU_AD,CAM_F,USS,CMMWRL,MMWRL,CMMWRR,MMWRR,ISA,BSIS_L,BSIS_R,AVAS,SDM,SSM,EPS,WEDM1,WEDM2,WEDM3,CMU1,CMU2,CMU3,CMU4,CMU5,CMU6,GSM,MCU1,MCU2,MCU3,MCU4,PDU,DCDC2,DCDC1,DCAC,OILDCAC,DCDC_H,TCU_B,TWV_L,TWV_R,TWV_F,TWV_B,EPM,ETC,TGW,HCU,FCU_1,FCU_2,HPF_1,HPF_2,BDU
+ SG_ CruiseControlActive : 24|2@1+ (1,0) [0|3] ""  UDS
+ SG_ Status_of_brake_switch : 28|2@1+ (1,0) [0|3] ""  CDCU,BDCU,ECAS,ELC,ADCU,TGW
+ SG_ ClutchSwitch : 30|2@1+ (1,0) [0|3] ""  UDS
+ SG_ PTOGovernorState : 48|5@1+ (1,0) [0|31] ""  UDS
+ SG_ CruiseControlStates : 53|3@1+ (1,0) [0|7] ""  UDS
+
+BO_ 2364539395 VDC_ETC1: 8 VDC
+ SG_ DrivelineEngaged : 0|2@1+ (1,0) [0|3] ""  EBS_K,TGW
+ SG_ Torq_Converter_Lockup_Engaged : 2|2@1+ (1,0) [0|3] ""  EBS_K,TGW
+ SG_ TransmissionShiftInProcess : 4|2@1+ (1,0) [0|3] ""  EBS_K,TGW
+ SG_ OutputShaftSpeed : 8|16@1+ (0.125,0) [0|8191.875] "rpm"  TGW
+ SG_ IntputShaftSpeed : 40|16@1+ (0.125,0) [0|8191.875] "rpm"  EBS_W,EBS_K,TGW
+
+BO_ 2565866755 VDC_ETC2: 8 VDC
+ SG_ SelectedGear : 0|8@1+ (1,-125) [-125|126] ""  ADCU,MCU_AD,CAM_F,TGW
+ SG_ ActualGearRatio : 8|16@1+ (0.001,0) [0|64.255] ""  TGW
+ SG_ CurrentGear : 24|8@1+ (1,-125) [-125|125] ""  EPB,EPB_T,EBS_K,ADCU,MCU_AD,CAM_F,TGW
+
+BO_ 2365484270 VDC_TCO1: 8 VDC
+ SG_ Tac_Output_Shaft_speed : 32|16@1+ (0.125,0) [0|8031.875] "rpm"  TGW
+ SG_ VehicleSpeed : 48|16@1+ (0.00390625,0) [0|250.996] "km/h"  ECAS,ELC,EPB,EPB_T,EBS_K,EHPS,TGW
+
+BO_ 2364539904 VDC_EEC1: 8 VDC
+ SG_ ActualMotorPercentTorqueHighReso : 4|4@1+ (0.125,0) [0|0.875] "%"  EBS,TGW
+ SG_ DriverDemandEnginePercentTorque : 8|8@1+ (1,-125) [-125|125] "%"  EPB,EPB_T,EBS,EBS_K,ADCU,MCU_AD,CAM_F,TGW,FMS
+ SG_ ActualEnginePercentTorque : 16|8@1+ (1,-125) [-125|125] "%"  ELC,EPB,EPB_T,EBS,EBS_K,ADCU,MCU_AD,CAM_F,TGW
+ SG_ EngineSpeed : 24|16@1+ (0.125,0) [0|8031.875] "rpm"  ECAS,ELC,EPB,EPB_T,EBS,EBS_K,ADCU,EPS,TGW,FMS
+
+BO_ 2364539648 VDC_EEC2: 8 VDC
+ SG_ AcceleratorPedal1LowIdleSwitch : 0|2@1+ (1,0) [0|3] ""  EBS_K,TGW
+ SG_ AcceleratorPedalPosition1 : 8|8@1+ (0.4,0) [0|100] "%"  EPB,EPB_T,EBS,EBS_K,TGW
+ SG_ MotorPercentLoadAtCurrentSpeed : 16|8@1+ (1,0) [0|125] "%"  EBS,TGW
+
+BO_ 2566840064 VDC_EEC3: 8 VDC
+ SG_ Nominal_Friction_Pct_Torq : 0|8@1+ (1,-125) [-125|125] "%"  EBS,EBS_K,TGW
+ SG_ Estimated_Engine_Para_Losses_PT : 32|8@1+ (1,-125) [-125|125] "%"  EBS,TGW
+
+BO_ 2298375691 EBS_HRW: 8 EBS
+ SG_ FrontAxleLeftWheelSpeed : 0|16@1+ (0.00390625,0) [0|250.996] "km/h"  BDCU,VDC,TPMS_F,TPMS_R,TPMS_Trailer,MCU_AD,CAM_F,CMMWRL,MMWRL,CMMWRR,MMWRR,DR3,TGW
+ SG_ FrontAxleRightWheelSpeed : 16|16@1+ (0.00390625,0) [0|250.996] "km/h"  BDCU,VDC,TPMS_F,TPMS_R,TPMS_Trailer,MCU_AD,CAM_F,CMMWRL,MMWRL,CMMWRR,MMWRR,DR3,TGW
+ SG_ RearAxelLeftWheelSpeed : 32|16@1+ (0.00390625,0) [0|250.996] "km/h"  BDCU,VDC,TPMS_F,TPMS_R,TPMS_Trailer,MCU_AD,CAM_F,CMMWRL,MMWRL,CMMWRR,MMWRR,DR3,TGW
+ SG_ RearAxleRightWheelSpeed : 48|16@1+ (0.00390625,0) [0|250.996] "km/h"  BDCU,VDC,TPMS_F,TPMS_R,TPMS_Trailer,MCU_AD,CAM_F,CMMWRL,MMWRL,CMMWRR,MMWRR,DR3,TGW
+
+BO_ 2565865739 EBS_EBC1: 8 EBS
+ SG_ ASREngineControlActive : 0|2@1+ (1,0) [0|3] ""  CDCU,VDC,ELC,ADCU,MCU_AD,CAM_F,TGW
+ SG_ ASRBrakeControlActive : 2|2@1+ (1,0) [0|3] ""  CDCU,VDC,ELC,EPB,EPB_T,ADCU,MCU_AD,CAM_F,TGW
+ SG_ ABSActive : 4|2@1+ (1,0) [0|3] ""  CDCU,VDC,ELC,EPB,EPB_T,ADCU,MCU_AD,CAM_F,TGW
+ SG_ EBSBrakeSwitch : 6|2@1+ (1,0) [0|3] ""  CDCU,BDCU,VDC,ELC,ADCU,MCU_AD,CAM_F,ISA,BSIS_L,BSIS_R,TGW
+ SG_ BrakePedalPosition : 8|8@1+ (0.004,0) [0|1] ""  VDC,ELC,EPB,EPB_T,ADCU,MCU_AD,CAM_F,TGW
+ SG_ ABSoff_roadswitch : 16|2@1+ (1,0) [0|3] ""  TGW
+ SG_ ASRoff_roadswitch : 18|2@1+ (1,0) [0|3] ""  CDCU,ADCU,MCU_AD,CAM_F,TGW
+ SG_ ASRHillHolderSwitch : 20|2@1+ (1,0) [0|3] ""  ADCU,MCU_AD,CAM_F,TGW
+ SG_ AcceleratorInterlockSwitch : 24|2@1+ (1,0) [0|3] ""  TGW
+ SG_ EngineRetarderSelection : 32|8@1+ (0.004,0) [0|1.02] ""  TGW
+ SG_ ABSfullyOperational : 40|2@1+ (1,0) [0|3] ""  CDCU,VDC,ADCU,MCU_AD,CAM_F,TGW
+ SG_ EBSRedWarningSignal : 42|2@1+ (1,0) [0|3] ""  CDCU,IPC,VDC,ADCU,MCU_AD,CAM_F,TGW
+ SG_ ABS_EBSamberWarningState : 44|2@1+ (1,0) [0|3] ""  CDCU,IPC,ADCU,MCU_AD,CAM_F,TGW
+ SG_ ATC_ASR_Information_Signal : 46|2@1+ (1,0) [0|3] ""  CDCU,ADCU,MCU_AD,CAM_F,TGW
+ SG_ SourceAddressofControllingD_0000 : 48|8@1+ (1,0) [0|255] ""  ADCU,MCU_AD,CAM_F,TGW
+ SG_ Halt_Brake_Switch : 58|2@1+ (1,0) [0|3] ""  CDCU,ADCU,TGW
+ SG_ Trailer_ABS_Status : 60|2@1+ (1,0) [0|3] ""  CDCU,ADCU,MCU_AD,CAM_F,TGW
+ SG_ Tractor_mounted_Trailer_ABS_0002 : 62|2@1+ (1,0) [0|3] ""  CDCU,IPC,ADCU,TGW
+
+BO_ 2566831883 EBS_EBC2: 8 EBS
+ SG_ FrontAxleSpeed : 0|16@1+ (0.00390625,0) [0|250.996] "km/h"  CMS_L,CMS_R,VDC,ELC,EPB,EPB_T,EPS,TGW
+ SG_ RelativeSpeedFrontAxleLeftWheel : 16|8@1+ (0.0625,-7.8125) [-7.8125|7.8125] "km/h"  CMS_L,CMS_R,VDC,ELC,EPS
+ SG_ RelativeSpeedFrontAxleRightWheel : 24|8@1+ (0.0625,-7.8125) [-7.8125|7.8125] "km/h"  CMS_L,CMS_R,VDC,ELC,EPS
+ SG_ RelativeSpeedRearAxle1LeftWheel : 32|8@1+ (0.0625,-7.8125) [-7.8125|7.8125] "km/h"  CMS_L,CMS_R,VDC,ELC,EPS
+ SG_ RelativeSpeedRearAxle1RightWheel : 40|8@1+ (0.0625,-7.8125) [-7.8125|7.8125] "km/h"  CMS_L,CMS_R,VDC,ELC,EPS
+ SG_ RelativeSpeedRearAxle2LeftWheel : 48|8@1+ (0.0625,-7.8125) [-7.8125|7.8125] "km/h"  CMS_L,CMS_R,VDC,ELC,EPS
+ SG_ RelativeSpeedRearAxle2RightWheel : 56|8@1+ (0.0625,-7.8125) [-7.8125|7.8125] "km/h"  CMS_L,CMS_R,VDC,ELC,EPS
+
+BO_ 2566832622 CDCU_VDHR: 8 CDCU
+ SG_ HighReTotalVehicleDistance : 0|32@1+ (5,0) [0|9999999995] "m"  CMS_L,CMS_R,HUD,IPC,BDCU,ESCL,SJBUP,SJBUN,ADBL,ADBR,DCM,VDC,VTDR,EBS_K,PWC,TPMS_F,TPMS_R,TPMS_Trailer,AC,ADCU,MCU_AD,CAM_F,USS,CMMWRL,MMWRL,CMMWRR,MMWRR,AVAS,SDM,SSM,EPS,EHPS,WEDM1,WEDM2,WEDM3,CMU1,CMU2,CMU3,CMU4,CMU5,CMU6,GSM,MCU1,MCU2,MCU3,MCU4,PDU,DCDC2,DCDC1,DCAC,OILDCAC,TCU_B,EPM,ETC,TGW,HCU,FCU_1,FCU_2,HPF_1,HPF_2,BDU
+ SG_ HighResolutionTripDistanceA : 32|32@1+ (5,0) [0|9999999995] "m"  VDC,TGW
+
+BO_ 2565869863 VDC_MCU: 64 VDC
+ SG_ MCUserialnumber1 : 0|8@1+ (1,0) [0|253] ""  BDCU,TGW
+ SG_ MCU1Status : 8|8@1+ (1,0) [0|253] ""  BDCU,TGW
+ SG_ MCU1ECUTemp : 16|8@1+ (1,-40) [-40|210] "degC"  BDCU,TGW
+ SG_ MCUMotorTemp : 24|8@1+ (1,-40) [-40|210] "degC"  BDCU,TGW
+ SG_ MCU1_Spd : 32|16@1+ (1,-20000) [-20000|45531] "rpm"  BDCU,MCU_AD,CAM_F,TGW
+ SG_ MCU1_Torque : 48|16@1+ (1,-20000) [-20000|45531] "N.M"  BDCU,MCU_AD,CAM_F,TGW
+ SG_ MCU1MotorVolatge : 64|16@1+ (0.1,0) [0|1000] "V"  BDCU,TGW
+ SG_ MCU1MotorCurrent : 80|16@1+ (0.1,-1000) [-1000|1000] "A"  BDCU,TGW
+ SG_ MCUserialnumber2 : 96|8@1+ (1,0) [0|253] ""  BDCU,TGW
+ SG_ MCU2Status : 104|8@1+ (1,0) [0|253] ""  BDCU,TGW
+ SG_ MCU2ECUTemp : 112|8@1+ (1,-40) [-40|210] "degC"  BDCU,TGW
+ SG_ MCU2MotorTemp : 120|8@1+ (1,-40) [-40|210] "degC"  BDCU,TGW
+ SG_ MCU2_Spd : 128|16@1+ (1,-20000) [-20000|45531] "rpm"  BDCU,MCU_AD,CAM_F,TGW
+ SG_ MCU2_Torque : 144|16@1+ (1,-20000) [-20000|45531] "N.M"  BDCU,MCU_AD,CAM_F,TGW
+ SG_ MCU2MotorVolatge : 160|16@1+ (0.1,0) [0|1000] "V"  BDCU,TGW
+ SG_ MCU2MotorCurrent : 176|16@1+ (0.1,-1000) [-1000|1000] "A"  BDCU,TGW
+ SG_ MCUserialnumber3 : 192|8@1+ (1,0) [0|253] ""  BDCU,TGW
+ SG_ MCU3Status : 200|8@1+ (1,0) [0|253] ""  BDCU,TGW
+ SG_ MCU3ECUTemp : 208|8@1+ (1,-40) [-40|210] "degC"  BDCU,TGW
+ SG_ MCU3MotorTemp : 216|8@1+ (1,-40) [-40|210] "degC"  BDCU,TGW
+ SG_ MCU3_Spd : 224|16@1+ (1,-20000) [-20000|45531] "rpm"  BDCU,MCU_AD,CAM_F,TGW
+ SG_ MCU3_Torque : 240|16@1+ (1,-20000) [-20000|45531] "N.M"  BDCU,MCU_AD,CAM_F,TGW
+ SG_ MCU3MotorVolatge : 256|16@1+ (0.1,0) [0|1000] "V"  BDCU,TGW
+ SG_ MCU3MotorCurrent : 272|16@1+ (0.1,-1000) [-1000|1000] "A"  BDCU,TGW
+ SG_ MCUserialnumber4 : 288|8@1+ (1,0) [0|253] ""  BDCU,TGW
+ SG_ MCU4Status : 296|8@1+ (1,0) [0|253] ""  BDCU,TGW
+ SG_ MCU4ECUTemp : 304|8@1+ (1,-40) [-40|210] "degC"  BDCU,TGW
+ SG_ MCU4MotorTemp : 312|8@1+ (1,-40) [-40|210] "degC"  BDCU,TGW
+ SG_ MCU4_Spd : 320|16@1+ (1,-20000) [-20000|45531] "rpm"  BDCU,MCU_AD,CAM_F,TGW
+ SG_ MCU4_Torque : 336|16@1+ (1,-20000) [-20000|45531] "N.M"  BDCU,MCU_AD,CAM_F,TGW
+ SG_ MCU4MotorVolatge : 352|16@1+ (0.1,0) [0|1000] "V"  BDCU,TGW
+ SG_ MCU4MotorCurrent : 368|16@1+ (0.1,-1000) [-1000|1000] "A"  BDCU,TGW
+ SG_ MCUTotalFaultNumber : 384|8@1+ (1,0) [0|250] ""  BDCU,TGW
+ SG_ Speedregulationtime : 424|8@1+ (10,0) [0|2550] "ms"  TGW
+ SG_ Torquereductiontime : 432|8@1+ (10,0) [0|2550] "ms"  TGW
+ SG_ Shift_outtime : 440|8@1+ (10,0) [0|2550] "ms"  TGW
+ SG_ Shift_intime : 448|8@1+ (10,0) [0|2550] "ms"  TGW
+ SG_ Shift_time : 456|8@1+ (10,0) [0|2550] "ms"  TGW
+ SG_ Eme_Acceleratingstate : 464|2@1+ (1,0) [0|3] ""  TGW
+ SG_ Eme_decelerationstate : 466|2@1+ (1,0) [0|3] ""  TGW
+ SG_ Shiftcompletionstatus : 468|4@1+ (1,0) [0|15] ""  TGW
+ SG_ Eme_turningstate : 472|2@1+ (1,0) [0|3] ""  TGW
+ SG_ MCUFaultCode : 392|32@1+ (1,0) [0|4294967295] ""  BDCU,TGW
+
+BO_ 2566864167 VDC_CMU_Status: 48 VDC
+ SG_ VDC_CMU1_FrmNumProbeTemp : 0|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU1_PackNumCellVol : 8|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU2_FrmNumProbeTemp : 16|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU2_PackNumCellVol : 24|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU3_FrmNumProbeTemp : 32|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU3_PackNumCellVol : 40|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU4_FrmNumProbeTemp : 48|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU4_PackNumCellVol : 56|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU5_FrmNumProbeTemp : 64|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU5_PackNumCellVol : 72|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU6_FrmNumProbeTemp : 80|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU6_PackNumCellVol : 88|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU_FaultNum : 96|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_CMU_FaultCode : 104|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ VDC_TotalVolatge : 112|16@1+ (0.1,0) [0|1000] "V"  CDCU,TGW
+ SG_ VDC_TotalCurrent : 128|16@1+ (0.1,-1000) [-1000|1000] "A"  CDCU,TGW
+ SG_ VDC_CMUSOC : 144|8@1+ (1,0) [0|100] "%"  TGW
+ SG_ VDC_Insulation_R : 152|16@1+ (1,0) [0|60000] "kOhm"  CDCU,TGW
+ SG_ VDC_InsulationFault_Level : 168|2@1+ (1,0) [0|3] ""  CDCU,IPC,TGW
+ SG_ CMU1MaxTempProbeSerialNumber_TGW : 176|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU1MinTempProbeSerialNumber_TGW : 184|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU2MaxTempProbeSerialNumber_TGW : 192|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU2MinTempProbeSerialNumber_TGW : 200|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU3MaxTempProbeSerialNumber_TGW : 208|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU3MinTempProbeSerialNumber_TGW : 216|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU4MaxTempProbeSerialNumber_TGW : 224|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU4MinTempProbeSerialNumber_TGW : 232|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU5MaxTempProbeSerialNumber_TGW : 240|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU5MinTempProbeSerialNumber_TGW : 248|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU6MaxTempProbeSerialNumber_TGW : 256|8@1+ (1,0) [0|250] ""  TGW
+ SG_ CMU6MinTempProbeSerialNumber_TGW : 264|8@1+ (1,0) [0|250] ""  TGW
+
+BO_ 2566863655 VDC_CMU_Vol: 64 VDC
+ SG_ VDC_CMU1_Cell_Vol_NumberTOTGW : 0|16@1+ (1,0) [0|65535] ""  CDCU,TGW
+ SG_ VDC_CMU1_Cell_Vol_3n_1TOTGW : 16|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU1_Cell_Vol_3n_2TOTGW : 32|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU1_Cell_Vol_3n_3TOTGW : 48|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU2_Cell_Vol_NumberTOTGW : 64|16@1+ (1,0) [0|65535] ""  CDCU,TGW
+ SG_ VDC_CMU2_Cell_Vol_3n_1TOTGW : 80|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU2_Cell_Vol_3n_2TOTGW : 96|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU2_Cell_Vol_3n_3TOTGW : 112|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU3_Cell_Vol_NumberTOTGW : 128|16@1+ (1,0) [0|65535] ""  CDCU,TGW
+ SG_ VDC_CMU3_Cell_Vol_3n_1TOTGW : 144|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU3_Cell_Vol_3n_2TOTGW : 160|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU3_Cell_Vol_3n_3TOTGW : 176|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU4_Cell_Vol_NumberTOTGW : 192|16@1+ (1,0) [0|65535] ""  CDCU,TGW
+ SG_ VDC_CMU4_Cell_Vol_3n_1TOTGW : 208|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU4_Cell_Vol_3n_2TOTGW : 224|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU4_Cell_Vol_3n_3TOTGW : 240|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU5_Cell_Vol_NumberTOTGW : 256|16@1+ (1,0) [0|65535] ""  CDCU,TGW
+ SG_ VDC_CMU5_Cell_Vol_3n_1TOTGW : 272|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU5_Cell_Vol_3n_2TOTGW : 288|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU5_Cell_Vol_3n_3TOTGW : 304|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU6_Cell_Vol_NumberTOTGW : 320|16@1+ (1,0) [0|65535] ""  CDCU,TGW
+ SG_ VDC_CMU6_Cell_Vol_3n_1TOTGW : 336|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU6_Cell_Vol_3n_2TOTGW : 352|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ VDC_CMU6_Cell_Vol_3n_3TOTGW : 368|16@1+ (0.001,0) [0|65.535] "V"  CDCU,TGW
+ SG_ CMU1_Bat_CurrentTOTGW : 384|16@1+ (0.1,-3200) [-3200|3200] ""  CDCU,TGW
+ SG_ CMU1_Pack_VolTotalTOTGW : 400|16@1+ (0.1,0) [0|6553.5] "V"  CDCU,TGW
+ SG_ CMU2_Bat_CurrentTOTGW : 416|16@1+ (0.1,-3200) [-3200|3200] ""  CDCU,TGW
+ SG_ CMU2_Pack_VolTotalTOTGW : 432|16@1+ (0.1,0) [0|6553.5] "V"  CDCU,TGW
+ SG_ CMU3_Bat_CurrentTOTGW : 448|16@1+ (0.1,-3200) [-3200|3200] ""  CDCU,TGW
+ SG_ CMU3_Pack_VolTotalTOTGW : 464|16@1+ (0.1,0) [0|6553.5] "V"  CDCU,TGW
+ SG_ CMU4_Bat_CurrentTOTGW : 480|16@1+ (0.1,-3200) [-3200|3200] ""  CDCU,TGW
+ SG_ CMU4_Pack_VolTotalTOTGW : 496|16@1+ (0.1,0) [0|6553.5] "V"  CDCU,TGW
+
+BO_ 2566863911 VDC_CMU_Temp: 64 VDC
+ SG_ CMU1_CellTemp_NumberTOTGW : 0|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ CMU1_Cell_Temp_1TOTGW : 8|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU1_Cell_Temp_2TOTGW : 16|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU1_Cell_Temp_3TOTGW : 24|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU1_Cell_Temp_4TOTGW : 32|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU1_Cell_Temp_5TOTGW : 40|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU1_Cell_Temp_6TOTGW : 48|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU2_CellTemp_NumberTOTGW : 56|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ CMU2_Cell_Temp_1TOTGW : 64|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU2_Cell_Temp_2TOTGW : 72|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU2_Cell_Temp_3TOTGW : 80|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU2_Cell_Temp_4TOTGW : 88|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU2_Cell_Temp_5TOTGW : 96|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU2_Cell_Temp_6TOTGW : 104|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU3_CellTemp_NumberTOTGW : 112|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ CMU3_Cell_Temp_1TOTGW : 120|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU3_Cell_Temp_2TOTGW : 128|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU3_Cell_Temp_3TOTGW : 136|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU3_Cell_Temp_4TOTGW : 144|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU3_Cell_Temp_5TOTGW : 152|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU3_Cell_Temp_6TOTGW : 160|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU4_CellTemp_NumberTOTGW : 168|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ CMU4_Cell_Temp_1TOTGW : 176|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU4_Cell_Temp_2TOTGW : 184|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU4_Cell_Temp_3TOTGW : 192|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU4_Cell_Temp_4TOTGW : 200|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU4_Cell_Temp_5TOTGW : 208|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU4_Cell_Temp_6TOTGW : 216|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU5_CellTemp_NumberTOTGW : 224|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ CMU5_Cell_Temp_1TOTGW : 232|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU5_Cell_Temp_2TOTGW : 240|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU5_Cell_Temp_3TOTGW : 248|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU5_Cell_Temp_4TOTGW : 256|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU5_Cell_Temp_5TOTGW : 264|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU5_Cell_Temp_6TOTGW : 272|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU6_CellTemp_NumberTOTGW : 280|8@1+ (1,0) [0|255] ""  CDCU,TGW
+ SG_ CMU6_Cell_Temp_1TOTGW : 288|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU6_Cell_Temp_2TOTGW : 296|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU6_Cell_Temp_3TOTGW : 304|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU6_Cell_Temp_4TOTGW : 312|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU6_Cell_Temp_5TOTGW : 320|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU6_Cell_Temp_6TOTGW : 328|8@1+ (1,-40) [-40|215] "degC"  CDCU,TGW
+ SG_ CMU5_Bat_CurrentTOTGW : 336|16@1+ (0.1,-3200) [-3200|3200] ""  CDCU,TGW
+ SG_ CMU5_Pack_VolTotalTOTGW : 352|16@1+ (0.1,0) [0|6553.5] "V"  CDCU,TGW
+ SG_ CMU6_Bat_CurrentTOTGW : 368|16@1+ (0.1,-3200) [-3200|3200] ""  CDCU,TGW
+ SG_ CMU6_Pack_VolTotalTOTGW : 384|16@1+ (0.1,0) [0|6553.5] "V"  CDCU,TGW
+
+BO_ 2565871911 VDC_FaultAlarm: 8 VDC
+ SG_ MaxAlarmLevel : 0|8@1+ (1,0) [0|3] ""  TGW
+ SG_ TempDifferenceAlarm : 8|1@1+ (1,0) [0|1] ""  TGW
+ SG_ BatteryHighTempAlarm : 9|1@1+ (1,0) [0|1] ""  TGW
+ SG_ OnBoardEnergyStorageDeviceTypeOv : 10|1@1+ (1,0) [0|1] ""  TGW
+ SG_ OnBoardEnergyStorageDeviceTypeUn : 11|1@1+ (1,0) [0|1] ""  TGW
+ SG_ SOCLowWlarm : 12|1@1+ (1,0) [0|1] ""  TGW
+ SG_ SingleBatteryOvervoltageAlarm : 13|1@1+ (1,0) [0|1] ""  TGW
+ SG_ SingleBatteryUndervoltageAlarm : 14|1@1+ (1,0) [0|1] ""  TGW
+ SG_ SOCHighAlarm : 15|1@1+ (1,0) [0|1] ""  TGW
+ SG_ SOCJumpAlarm : 16|1@1+ (1,0) [0|1] ""  TGW
+ SG_ ChargeableEnergyStorageSystemMis : 17|1@1+ (1,0) [0|1] ""  TGW
+ SG_ PoorConsistencyAlarmOfBatteryCel : 18|1@1+ (1,0) [0|1] ""  TGW
+ SG_ InsulationAlarm : 19|1@1+ (1,0) [0|1] ""  TGW
+ SG_ DC_DCTemperatureAlarm : 20|1@1+ (1,0) [0|1] ""  TGW
+ SG_ DriveControllerTemperatureAlarm : 21|1@1+ (1,0) [0|1] ""  TGW
+ SG_ HighVoltageInterlockStatusAlarm : 22|1@1+ (1,0) [0|1] ""  TGW
+ SG_ DriveMotorTemperatureAlarm : 23|1@1+ (1,0) [0|1] ""  TGW
+ SG_ OnBoardEnergyStorageDeviceT_0000 : 24|1@1+ (1,0) [0|1] ""  TGW
+ SG_ DC_DCStatusAlarm : 25|1@1+ (1,0) [0|1] ""  TGW
+
+BO_ 2565869351 VDC_VehicleStatus: 16 VDC
+ SG_ VehicleStatus : 0|8@1+ (1,0) [0|255] ""  CDCU,BDCU,ADCU,MCU_AD,CAM_F,CMMWRL,MMWRL,CMMWRR,MMWRR,TGW
+ SG_ ChargeStatus : 8|8@1+ (1,0) [0|255] ""  CDCU,BDCU,MMWRL,MMWRR,TGW
+ SG_ RUNMode : 16|8@1+ (1,0) [0|255] ""  CDCU,MMWRL,MMWRR,TGW
+ SG_ MCUNumber : 24|8@1+ (1,0) [0|253] ""  CDCU,MMWRL,MMWRR,TGW
+ SG_ DCDCStatus : 32|8@1+ (1,0) [0|250] ""  CDCU,IPC,MMWRL,MMWRR,TGW
+ SG_ GearStatus : 40|4@1+ (1,0) [0|15] ""  MCU_AD,MMWRL,MMWRR,TGW
+ SG_ Brakingforce : 44|1@1+ (1,0) [0|1] ""  MMWRL,MMWRR,TGW
+ SG_ DrivingStatus : 45|1@1+ (1,0) [0|1] ""  MMWRL,MMWRR,TGW
+ SG_ AC_ForbidCommond : 50|2@1+ (1,0) [0|3] ""  CDCU,BDCU,MMWRL,MMWRR,TGW
+ SG_ PTC_ForbidCommond : 52|2@1+ (1,0) [0|3] ""  CDCU,BDCU,MMWRL,MMWRR,TGW
+ SG_ VDC_Driving_mode : 54|2@1+ (1,0) [0|3] ""  MMWRL,MMWRR,TGW
+ SG_ AC_Power_Enable : 64|8@1+ (0.1,0) [0|25] "KW"  BDCU,MMWRL,MMWRR,TGW
+ SG_ PTC_Power_Enable : 72|8@1+ (0.2,0) [0|40] "KW"  BDCU,MMWRL,MMWRR,TGW
+ SG_ MCU1_InstantaneousPower : 80|12@1+ (0.1,0) [0|409.5] "KW"  TGW
+ SG_ MCU2_InstantaneousPower : 92|12@1+ (0.1,0) [0|409.5] "KW"  TGW
+ SG_ MCU3_InstantaneousPower : 104|12@1+ (0.1,0) [0|409.5] "KW"  TGW
+ SG_ MCU4_InstantaneousPower : 116|12@1+ (0.1,0) [0|409.5] "KW"  TGW
+
+BO_ 2550212472 PDU_VDC_Msg1: 8 PDU
+ SG_ PDU_Work_Status : 12|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDU_Aux_drive_relay_status : 14|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDU_Main_drive_relay_status : 16|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDU_WPTC_relay_status : 18|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDU_PTC_relay_status : 20|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDUDCchargeAPaselaystatus : 22|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDUDCchargeANegrelaystatus : 24|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDUDCchargeBPasrelaystatus : 26|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDUDCchargeBNegrelaystatus : 28|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDU_PD1Realy_Status : 30|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDU_PD2Realy_Status : 32|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDUSelfcheckstatus : 34|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_MainivePeChargestatePCAN : 35|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_MainPreChargeSuccess_PCAN : 36|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDU_AuxiliaryPreChargeSuccess_PC : 38|2@1+ (1,0) [0|3] ""  VDC
+ SG_ PDU_Prechg_relay_timeoutFault : 40|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Main_drive_relay_cutoff : 41|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Main_drive_L_Bat_Low : 42|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Main_drive_relay_close : 43|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Prechg_relay_timeout : 44|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Aux_drive_relay_short : 45|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Aux_drive_L_Bat_Low : 46|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Aux_drive_relay_close : 47|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Insulation_value : 48|16@1+ (1,0) [0|65535] "kohm"  VDC
+
+BO_ 2550278008 PDU_VDC_Msg2: 8 PDU
+ SG_ PDU_DTC_level : 12|4@1+ (1,0) [0|15] ""  VDC
+ SG_ PDU_DTC_Fault : 16|8@1+ (1,0) [0|255] ""  VDC
+ SG_ PDU_Input_Voltage : 24|16@1+ (0.1,0) [0|6553.5] "V"  VDC
+ SG_ PDU_BMS_Vol_relay_wo_range : 40|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_LV_Bat_Low : 41|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_LV_Bat_High : 42|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_EEPROM_Write_Error : 43|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Busoff : 44|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_PDU_Note_Loss : 45|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_DCDC_Note_Loss : 46|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_CAN_Error_over_1min : 47|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Intranet_fault : 50|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_External_net_fault : 51|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Insulation_status : 52|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_Dormant_status : 53|1@1+ (1,0) [0|1] ""  VDC
+ SG_ PDU_AuxiliaryPrePeChargestatePCA : 54|1@1+ (1,0) [0|1] ""  VDC
+
+BO_ 2565872423 VDC_HCU_State1: 8 VDC
+ SG_ FuelCellVoltage : 0|16@1+ (0.1,0) [0|2000] "V"  TGW
+ SG_ FuelCellCurrent : 16|16@1+ (0.1,0) [0|2000] "A"  TGW
+ SG_ FuelConsumptionRate : 32|16@1+ (0.01,0) [0|600] "kg/100km"  TGW
+ SG_ TotalNumberFuelCellTempProbes : 48|16@1+ (1,0) [0|65531] ""  TGW
+
+BO_ 2565872935 VDC_HCU_State2: 12 VDC
+ SG_ MaxProbesTemp : 0|16@1+ (0.1,-40) [-40|200] "degC"  TGW
+ SG_ MaxProbesTempNum : 16|8@1+ (1,0) [0|252] ""  TGW
+ SG_ MaxHydrogenConcentration : 24|16@1+ (1,0) [0|60000] "mg/kg"  TGW
+ SG_ MaxHydrogenConcentrationNum : 40|8@1+ (1,0) [0|252] ""  TGW
+ SG_ MaxHydrogenPressure : 48|16@1+ (0.1,0) [0|1000] "MPA"  TGW
+ SG_ MaxHydrogenPressureSenNum : 64|8@1+ (1,0) [0|252] ""  TGW
+ SG_ HighVoltagDCDCStatus : 72|8@1+ (1,0) [0|252] ""  TGW
+
+BO_ 2565872679 VDC_HCU_TEMP: 8 VDC
+ SG_ ProbesTempValue : 0|8@1+ (1,-40) [-40|200] "degC"  TGW
+
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 0;
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","reserved","StandardCAN_FD","ExtendedCAN_FD";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
+BA_DEF_DEF_  "VFrameFormat" "StandardCAN_FD";
+BA_ "VFrameFormat" BO_ 2550212468 1;
+BA_ "VFrameFormat" BO_ 2550278004 1;
+BA_ "VFrameFormat" BO_ 2550343540 1;
+BA_ "VFrameFormat" BO_ 2550409076 1;
+BA_ "VFrameFormat" BO_ 2550212469 1;
+BA_ "VFrameFormat" BO_ 2550278005 1;
+BA_ "VFrameFormat" BO_ 2550343541 1;
+BA_ "VFrameFormat" BO_ 2550409077 1;
+BA_ "VFrameFormat" BO_ 2550212470 1;
+BA_ "VFrameFormat" BO_ 2550278006 1;
+BA_ "VFrameFormat" BO_ 2550343542 1;
+BA_ "VFrameFormat" BO_ 2550409078 1;
+BA_ "VFrameFormat" BO_ 2550212471 1;
+BA_ "VFrameFormat" BO_ 2550278007 1;
+BA_ "VFrameFormat" BO_ 2550343543 1;
+BA_ "VFrameFormat" BO_ 2550409079 1;
+BA_ "VFrameFormat" BO_ 2550212355 1;
+BA_ "VFrameFormat" BO_ 2550277891 1;
+BA_ "VFrameFormat" BO_ 2550343427 1;
+BA_ "VFrameFormat" BO_ 2550408963 1;
+BA_ "VFrameFormat" BO_ 2550474499 1;
+BA_ "VFrameFormat" BO_ 2550212356 1;
+BA_ "VFrameFormat" BO_ 2550277892 1;
+BA_ "VFrameFormat" BO_ 2550343428 1;
+BA_ "VFrameFormat" BO_ 2550408964 1;
+BA_ "VFrameFormat" BO_ 2550540036 1;
+BA_ "VFrameFormat" BO_ 2566844672 1;
+BA_ "VFrameFormat" BO_ 2364539395 1;
+BA_ "VFrameFormat" BO_ 2565866755 1;
+BA_ "VFrameFormat" BO_ 2365484270 1;
+BA_ "VFrameFormat" BO_ 2364539904 1;
+BA_ "VFrameFormat" BO_ 2364539648 1;
+BA_ "VFrameFormat" BO_ 2566840064 1;
+BA_ "VFrameFormat" BO_ 2298375691 1;
+BA_ "VFrameFormat" BO_ 2565865739 1;
+BA_ "VFrameFormat" BO_ 2566831883 1;
+BA_ "VFrameFormat" BO_ 2566832622 1;
+BA_ "VFrameFormat" BO_ 2565869863 15;
+BA_ "VFrameFormat" BO_ 2566864167 15;
+BA_ "VFrameFormat" BO_ 2566863655 15;
+BA_ "VFrameFormat" BO_ 2566863911 15;
+BA_ "VFrameFormat" BO_ 2565871911 15;
+BA_ "VFrameFormat" BO_ 2565869351 15;
+BA_ "VFrameFormat" BO_ 2550212472 1;
+BA_ "VFrameFormat" BO_ 2550278008 1;
+BA_ "VFrameFormat" BO_ 2565872423 15;
+BA_ "VFrameFormat" BO_ 2565872935 15;
+BA_ "VFrameFormat" BO_ 2565872679 15;
+BA_ "GenMsgCycleTime" BO_ 2550212468 10;
+BA_ "GenMsgCycleTime" BO_ 2550278004 20;
+BA_ "GenMsgCycleTime" BO_ 2550343540 1000;
+BA_ "GenMsgCycleTime" BO_ 2550409076 500;
+BA_ "GenMsgCycleTime" BO_ 2550212469 10;
+BA_ "GenMsgCycleTime" BO_ 2550278005 20;
+BA_ "GenMsgCycleTime" BO_ 2550343541 1000;
+BA_ "GenMsgCycleTime" BO_ 2550409077 500;
+BA_ "GenMsgCycleTime" BO_ 2550212470 10;
+BA_ "GenMsgCycleTime" BO_ 2550278006 20;
+BA_ "GenMsgCycleTime" BO_ 2550343542 1000;
+BA_ "GenMsgCycleTime" BO_ 2550409078 500;
+BA_ "GenMsgCycleTime" BO_ 2550212471 10;
+BA_ "GenMsgCycleTime" BO_ 2550278007 20;
+BA_ "GenMsgCycleTime" BO_ 2550343543 1000;
+BA_ "GenMsgCycleTime" BO_ 2550409079 500;
+BA_ "GenMsgCycleTime" BO_ 2550212355 10;
+BA_ "GenMsgCycleTime" BO_ 2550277891 10;
+BA_ "GenMsgCycleTime" BO_ 2550343427 10;
+BA_ "GenMsgCycleTime" BO_ 2550408963 10;
+BA_ "GenMsgCycleTime" BO_ 2550474499 10;
+BA_ "GenMsgCycleTime" BO_ 2550212356 10;
+BA_ "GenMsgCycleTime" BO_ 2550277892 10;
+BA_ "GenMsgCycleTime" BO_ 2550343428 10;
+BA_ "GenMsgCycleTime" BO_ 2550408964 10;
+BA_ "GenMsgCycleTime" BO_ 2550540036 10;
+BA_ "GenMsgCycleTime" BO_ 2566844672 100;
+BA_ "GenMsgCycleTime" BO_ 2364539395 10;
+BA_ "GenMsgCycleTime" BO_ 2565866755 100;
+BA_ "GenMsgCycleTime" BO_ 2365484270 50;
+BA_ "GenMsgCycleTime" BO_ 2364539904 20;
+BA_ "GenMsgCycleTime" BO_ 2364539648 50;
+BA_ "GenMsgCycleTime" BO_ 2566840064 250;
+BA_ "GenMsgCycleTime" BO_ 2298375691 20;
+BA_ "GenMsgCycleTime" BO_ 2565865739 100;
+BA_ "GenMsgCycleTime" BO_ 2566831883 50;
+BA_ "GenMsgCycleTime" BO_ 2566832622 1000;
+BA_ "GenMsgCycleTime" BO_ 2565869863 10;
+BA_ "GenMsgCycleTime" BO_ 2566864167 100;
+BA_ "GenMsgCycleTime" BO_ 2566863655 100;
+BA_ "GenMsgCycleTime" BO_ 2566863911 100;
+BA_ "GenMsgCycleTime" BO_ 2565871911 200;
+BA_ "GenMsgCycleTime" BO_ 2565869351 100;
+BA_ "GenMsgCycleTime" BO_ 2550212472 100;
+BA_ "GenMsgCycleTime" BO_ 2550278008 100;
+BA_ "GenMsgCycleTime" BO_ 2565872423 100;
+BA_ "GenMsgCycleTime" BO_ 2565872935 100;
+BA_ "GenMsgCycleTime" BO_ 2565872679 100;
+
+VAL_ 2550212468 MCU1_Motor1_state 0 "Power-off" 1 "Standby" 2 "Torque mode" 3 "Speed mode" ;
+VAL_ 2550212468 MCU1_Motor1_failure_class 0 "No fault" 1 "Level 1 - warn" 2 "Level 2 - derate" 3 "Level 3 - stop" ;
+VAL_ 2550212468 MCU1_IGBT_state 0 "Gate OFF - IGBT open" 1 "Gate ON - IGBT closed" ;
+VAL_ 2550212468 MCU1_HVLoopStas 0 "OK" 1 "Fault" ;
+VAL_ 2550278004 MCU1_Motor1_ASC_Mode 0 "Normal" 1 "Active Short Circuit" ;
+VAL_ 2550212469 MCU2_Motor2_state 0 "Power-off" 1 "Standby" 2 "Torque mode" 3 "Speed mode" ;
+VAL_ 2550212469 MCU2_Motor2_failure_class 0 "No fault" 1 "Level 1 - warn" 2 "Level 2 - derate" 3 "Level 3 - stop" ;
+VAL_ 2550212469 MCU2_IGBT_state 0 "Gate OFF - IGBT open" 1 "Gate ON - IGBT closed" ;
+VAL_ 2550212469 MCU2_HVLoopStas 0 "OK" 1 "Fault" ;
+VAL_ 2550278005 MCU2_Motor2_ASC_Mode 0 "Normal" 1 "Active Short Circuit" ;
+VAL_ 2550212470 MCU3_Motor3_state 0 "Power-off" 1 "Standby" 2 "Torque mode" 3 "Speed mode" ;
+VAL_ 2550212470 MCU3_Motor3_failure_class 0 "No fault" 1 "Level 1 - warn" 2 "Level 2 - derate" 3 "Level 3 - stop" ;
+VAL_ 2550212470 MCU3_IGBT_state 0 "Gate OFF - IGBT open" 1 "Gate ON - IGBT closed" ;
+VAL_ 2550212470 MCU3_HVLoopStas 0 "OK" 1 "Fault" ;
+VAL_ 2550278006 MCU3_Motor3_ASC_Mode 0 "Normal" 1 "Active Short Circuit" ;
+VAL_ 2550212471 MCU4_Motor4_state 0 "Power-off" 1 "Standby" 2 "Torque mode" 3 "Speed mode" ;
+VAL_ 2550212471 MCU4_Motor4_failure_class 0 "No fault" 1 "Level 1 - warn" 2 "Level 2 - derate" 3 "Level 3 - stop" ;
+VAL_ 2550212471 MCU4_IGBT_state 0 "Gate OFF - IGBT open" 1 "Gate ON - IGBT closed" ;
+VAL_ 2550212471 MCU4_HVLoopStas 0 "OK" 1 "Fault" ;
+VAL_ 2550278007 MCU4_Motor4_ASC_Mode 0 "Normal" 1 "Active Short Circuit" ;
+VAL_ 2550277891 TCU1_Shift_In_Process_Flag 0 "Not shifting" 1 "Shift in process" ;
+VAL_ 2550277891 TCU1_TCU_Allow_Shift 0 "Not permitted" 1 "Permitted" ;
+VAL_ 2550277891 TCU2_Shift_In_Process_Flag 0 "Not shifting" 1 "Shift in process" ;
+VAL_ 2550277891 TCU2_TCU_Allow_Shift 0 "Not permitted" 1 "Permitted" ;
+VAL_ 2550343427 TCU1_Failure_Level 0 "No fault" 1 "Level 1 - warn" 2 "Level 2 - derate" 3 "Level 3 - stop" ;
+VAL_ 2550343427 TCU2_Failure_Level 0 "No fault" 1 "Level 1 - warn" 2 "Level 2 - derate" 3 "Level 3 - stop" ;
+VAL_ 2550277892 TCU4_TCU_Allow_Shift 0 "Not permitted" 1 "Permitted" ;
+VAL_ 2550277892 TCU4_Shift_In_Process_Flag 0 "Not shifting" 1 "Shift in process" ;
+VAL_ 2550277892 TCU3_TCU_Allow_Shift 0 "Not permitted" 1 "Permitted" ;
+VAL_ 2550277892 TCU3_Shift_In_Process_Flag 0 "Not shifting" 1 "Shift in process" ;
+VAL_ 2550408964 TCU4_Failure_Level 0 "No fault" 1 "Level 1 - warn" 2 "Level 2 - derate" 3 "Level 3 - stop" ;
+VAL_ 2550408964 TCU3_Failure_Level 0 "No fault" 1 "Level 1 - warn" 2 "Level 2 - derate" 3 "Level 3 - stop" ;

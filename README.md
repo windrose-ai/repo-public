@@ -13,7 +13,27 @@ help accelerate the adoption of electric truck technology.
 
 | Path | Contents |
 |---|---|
+| [`dbc/`](dbc/) | **CAN database — the E700 read channel.** 48 messages, 458 signals: battery, motor, gearbox, brakes, insulation, vehicle state |
 | [`docs/`](docs/) | Interface documentation (ADAS control interface) |
+
+### What we publish, and what we do not
+
+The CAN database is split by **direction of information flow**, not by document.
+
+- **Published — the read channel.** Everything the vehicle broadcasts about its
+  own state: speeds, torques, currents, temperatures, state of charge,
+  insulation resistance, gear, distance, fault status.
+- **Not published — the write path.** Command messages, diagnostic and flashing
+  services, security access, and the checksum and rolling-counter definitions
+  that make a forged command acceptable.
+- **Not ours to publish.** Diagnostic specifications for bought-in brake,
+  suspension and steering electronics belong to those suppliers and are covered
+  by technical agreements.
+
+Reading a vehicle never changes it. Commanding one does. Withholding the
+dictionary was never a real security control — it fails against anyone
+determined, and it fails completely against the owner of the truck. The boundary
+belongs at the ability to command, not the ability to observe.
 
 ## License
 
