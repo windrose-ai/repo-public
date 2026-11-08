@@ -153,6 +153,20 @@ periodic frame. If an ECU answers a read with a negative response such as
 None of the addresses above has yet been confirmed by a logged read on a
 customer truck. If you read one, Windrose would like the log.
 
+### Read everything in one go
+
+[`tools/obd_read_all.py`](../tools/obd_read_all.py) does all of the above,
+read-only: it listens for 10 s, asks who is there, reads the identification
+DIDs and fault codes from every ECU that answers, sends the J1939 requests, and
+saves an `.asc` log plus a text summary. Anything that is not a question is
+refused before it reaches the bus.
+
+```text
+pip install python-can
+python obd_read_all.py            # PEAK, classic CAN 500 kbit/s
+python obd_read_all.py --fd       # if nothing answers: CAN FD 500k / 2M
+```
+
 ### Example with python-can and udsoncan
 
 ```text
