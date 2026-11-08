@@ -102,6 +102,10 @@ for msg in bus:
 Works with SavvyCAN, BusMaster, CANoe, TSMaster, `python-can` + `cantools`.
 Validated against `cantools`.
 
+> **Reading through the 16-pin OBD port?** Most of this file is not forwarded to
+> that plug, and a listen-only recording there is usually empty. See
+> [`docs/obd.md`](../docs/obd.md).
+
 > **Configure the interface in listen-only / silent mode.** This database
 > describes a read channel; a tool that transmits on a live vehicle bus can
 > disturb it regardless of what it sends. High-voltage system — follow the

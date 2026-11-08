@@ -15,6 +15,8 @@ help accelerate the adoption of electric truck technology.
 |---|---|
 | [`dbc/`](dbc/) | **CAN database — the E700 read channel.** 48 messages, 458 signals: battery, motor, gearbox, brakes, insulation, vehicle state |
 | [`docs/`](docs/) | Interface documentation (ADAS control interface) |
+| [`docs/obd.md`](docs/obd.md) | **How to read a truck through the OBD port** — ask with read-only UDS; a listen-only recording there is usually empty |
+| [`tools/obd_read_all.py`](tools/obd_read_all.py) | Read-only script: asks every ECU on the OBD port for identification and fault codes, saves a log |
 | [`docs/windrose-nx-prt.md`](docs/windrose-nx-prt.md) | Where Windrose NX `.prt` CAD lives on Google Drive (links and folder ids only) |
 
 ### What we publish, and what we do not
