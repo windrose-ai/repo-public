@@ -5,7 +5,7 @@ does not stream its internal buses onto it. A gateway sits between the OBD pins
 and the vehicle networks. On this plug you mostly get answers by **asking**,
 not by listening.
 
-## Lesson from the field
+## Lessons from the field
 
 A dealer connected a CAN adapter to the OBD port of a truck that was stopped
 with a fault and sent in the recording. The file came back empty. Why it was
@@ -17,22 +17,69 @@ anything about the condition of the truck. Before you record, decide whether
 you need to **listen** (J1939 broadcast, see below) or to **ask** (UDS). For
 fault codes and the VIN, you have to ask.
 
+On another truck, a PEAK adapter opened at classic CAN 500 kbit/s sat at its
+bus-error warning limit: about 10,000 error frames in 10 s, and no ECU
+answered. Bus errors on this plug point first at the cable-to-adapter wiring
+(see "Cable to adapter" below), then at the bus setting.
+
 ## The connector
 
 | Pin | Use |
 |---|---|
-| 6 | Diagnostic CAN high |
-| 14 | Diagnostic CAN low |
-| 16 | Battery + (do not connect it to your adapter's signal pins) |
+| 6 | Diagnostic CAN high (`GWCANFD9_H`) |
+| 14 | Diagnostic CAN low (`GWCANFD9_L`) |
+| 16 | Battery + 24 V, always on (do not connect it to your adapter's signal pins) |
 | 4, 5 | Ground |
+| 3, 11, 12, 13 | Diagnostic Ethernet (DoIP) |
 
-The same connector also carries diagnostic Ethernet (DoIP). This guide only
-covers CAN.
+Pins 6 and 14 are the diagnostic CAN segment between the gateway and the OBD
+connector (service manual 9.1.49, OBD circuit). The truck already terminates
+this segment with 120 Ω: **do not add a terminating resistor** on the adapter
+side.
 
-A standard J1962-to-DB9 cable works, but cable makers do not all use the same
-DB9 pinout. Check that pins 6 and 14 of the OBD plug land on the CAN-H and
-CAN-L pins your adapter expects. Never wire OBD pin 16 (battery voltage) to the
-adapter.
+The segment is named a CAN FD bus. Windrose's own UDS reads have used classic
+CAN at 500 kbit/s; whether the truck also puts CAN FD frames on it is not yet
+confirmed by a recording. `tools/obd_read_all.py` tries classic 500k, CAN FD
+500k/2M and classic 250k, listen-only, before it sends anything.
+
+This guide only covers CAN.
+
+### Cable to adapter: check the DB9 pins
+
+OBD-to-DB9 cables and CAN adapters do not use the same DB9 pinout. A common
+OBD-to-DB9 cable puts CAN-H on DB9 pin 3 and CAN-L on pin 5; a PEAK PCAN-USB
+expects CAN-H on pin 7, CAN-L on pin 2 and ground on pin 3. Plugged straight
+together, CAN-H lands on the adapter's ground and the adapter sees only bus
+errors at every bit rate.
+
+Check both pinouts before plugging in. If they differ, put two DB9
+screw-terminal boards between cable and adapter and wire them across. For an
+OBD-to-DB9 cable with CAN-H on 3 and CAN-L on 5, into a PEAK:
+
+| Signal | Cable side (male board) | PEAK side (female board) |
+|---|---|---|
+| CAN-H | 3 | 7 |
+| CAN-L | 5 | 2 |
+| Ground | 2 | 3 |
+| Signal ground | 1 | 6 |
+| Battery + | 9: **leave empty** | 9: **leave empty** |
+
+Never wire OBD pin 16 (battery voltage) to the adapter.
+
+### Check the physical layer with a meter
+
+Before blaming the bus setting, measure at the OBD connector with the adapter
+unplugged. These are typical values for a working high-speed CAN bus, not
+measurements from an E700:
+
+| Condition | Measure | Typical |
+|---|---|---|
+| Ignition off | Resistance pin 6 to pin 14 | about 60 Ω (two 120 Ω terminations); about 120 Ω if only one end is terminated |
+| Ignition on | Voltage pin 6 to pin 4 | about 2.5–3.5 V |
+| Ignition on | Voltage pin 14 to pin 4 | about 1.5–2.5 V |
+
+Open circuit between 6 and 14, or both pins at 0 V with the ignition on, means
+the cable, the connector or the segment itself, not the software.
 
 ## Before you start
 
@@ -229,7 +276,9 @@ file into an OBD session will mostly decode nothing.
 
 | What you see | What it means |
 |---|---|
-| Nothing at all, even after a request | Ignition off, wrong pins on the cable, or wrong bit rate |
+| Bus errors at every setting (classic 500k, CAN FD, classic 250k) | Wiring: CAN-H / CAN-L swapped or on the wrong DB9 pins, often a cable plugged straight into an adapter with a different pinout. See "Cable to adapter" |
+| Bus errors at classic CAN, clean frames at CAN FD | The segment carries CAN FD frames. Use CAN FD 500k/2M |
+| Nothing at all, even after a request | Ignition off, the gateway not awake, wrong pins on the cable, or wrong bit rate |
 | A few J1939 IDs, no answer to your request | Listening works; check the request ID, the 29-bit setting and the tester address `0xF1` |
 | `18DAF1xx` frames after your request | An ECU is answering |
 | Negative response `0x33` | That data needs security access. Stop |
