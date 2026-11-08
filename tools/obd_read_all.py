@@ -11,8 +11,14 @@ Every frame seen or sent goes into an .asc log. A plain-text summary is written
 next to it. Send both to Windrose.
 
   pip install python-can
-  python obd_read_all.py                       # PEAK, classic CAN 500 kbit/s
-  python obd_read_all.py --fd                  # CAN FD 500k / 2M
+  python obd_read_all.py                       # PEAK, finds the bus setting itself
+  python obd_read_all.py --fd                  # force CAN FD 500k / 2M
+  python obd_read_all.py --bitrate 500000      # force classic CAN 500k
+
+Before it sends anything it listens, adapter in listen-only mode, at classic
+500k, CAN FD 500k/2M and classic 250k, and only asks at a setting that reads
+the bus without errors. If every setting gives bus errors it stops without
+sending: check the wiring (CAN-H / CAN-L on OBD pins 6 / 14) and the ignition.
   python obd_read_all.py --interface kvaser --channel 0
 
 Ignition ON. Close PCAN-View and other CAN programs first. See docs/obd.md.
@@ -89,6 +95,7 @@ class Reader:
     def __init__(self, bus, log):
         self.bus, self.log = bus, log
         self.seen = {}
+        self.errors = 0
 
     def send(self, arb_id, data):
         data = bytes(data) + bytes([0xAA] * (8 - len(data)))
@@ -100,10 +107,18 @@ class Reader:
         self.log.on_message_received(msg)
 
     def recv(self, timeout):
-        msg = self.bus.recv(timeout)
-        if msg is not None:
-            self.log.on_message_received(msg)
-            self.seen[msg.arbitration_id] = self.seen.get(msg.arbitration_id, 0) + 1
+        try:
+            msg = self.bus.recv(timeout)
+        except can.CanError:          # e.g. receive queue overrun: note it, keep going
+            self.errors += 1
+            return None
+        if msg is None:
+            return None
+        self.log.on_message_received(msg)
+        if msg.is_error_frame:
+            self.errors += 1
+            return None
+        self.seen[msg.arbitration_id] = self.seen.get(msg.arbitration_id, 0) + 1
         return msg
 
     def listen(self, seconds):
@@ -133,7 +148,10 @@ class Reader:
                 continue
             pci = m.data[0] >> 4
             if pci == 0:
-                body = bytes(m.data[1:1 + (m.data[0] & 0x0F)])
+                if m.data[0] == 0x00 and len(m.data) > 8:   # CAN FD single frame, length in byte 1
+                    body = bytes(m.data[2:2 + m.data[1]])
+                else:
+                    body = bytes(m.data[1:1 + (m.data[0] & 0x0F)])
                 if body[:1] == b"\x7F" and body[2:3] == b"\x78":   # response pending
                     end = time.time() + 5.0
                     continue
@@ -180,21 +198,80 @@ def dtcs(body):
     return out
 
 
-def open_bus(a):
+MODES = [("classic 500k", False, 500000), ("CAN FD 500k/2M", True, 0), ("classic 250k", False, 250000)]
+
+
+def open_bus(a, fd, bitrate, passive=False):
     kw = dict(interface=a.interface, channel=a.channel)
-    if a.fd:
+    if fd:
         kw.update(fd=True, f_clock_mhz=80, nom_brp=2, nom_tseg1=63, nom_tseg2=16, nom_sjw=16,
                   data_brp=2, data_tseg1=15, data_tseg2=4, data_sjw=4)
     else:
-        kw.update(bitrate=a.bitrate)
+        kw.update(bitrate=bitrate)
+    if passive and a.interface == "pcan":
+        kw.update(state=can.BusState.PASSIVE)   # listen-only: no ACK, no error flags
     return can.Bus(**kw)
+
+
+def probe(a, fd, bitrate, seconds=2.0):
+    """Listen-only. Returns (good frames, error frames, distinct IDs)."""
+    bus = open_bus(a, fd, bitrate, passive=True)
+    good, bad, ids = 0, 0, set()
+    end = time.time() + seconds
+    try:
+        while time.time() < end:
+            try:
+                m = bus.recv(0.1)
+            except can.CanError:
+                bad += 1
+                continue
+            if m is None:
+                continue
+            if m.is_error_frame:
+                bad += 1
+            else:
+                good += 1
+                ids.add(m.arbitration_id)
+    finally:
+        bus.shutdown()
+    return good, bad, len(ids)
+
+
+def choose_mode(a, say):
+    if a.fd:
+        return "CAN FD 500k/2M", True, 0
+    if a.bitrate:
+        return "classic %dk" % (a.bitrate // 1000), False, a.bitrate
+    say("0. Finding the bus setting (listen-only, nothing sent)")
+    results = []
+    for name, fd, br in MODES:
+        try:
+            good, bad, nids = probe(a, fd, br)
+        except can.CanError as exc:
+            say("   %-15s could not open: %s" % (name, exc))
+            continue
+        say("   %-15s %6d frames, %3d IDs, %6d bus errors" % (name, good, nids, bad))
+        results.append((name, fd, br, good, bad))
+        if good and bad <= good // 20:
+            return name, fd, br
+    if results and all(r[3] == 0 and r[4] == 0 for r in results):
+        say("   the bus is silent on every setting; asking at classic 500k")
+        return MODES[0][0], MODES[0][1], MODES[0][2]
+    clean = [r for r in results if r[3] and r[3] >= r[4]]
+    if clean:
+        best = max(clean, key=lambda r: r[3] - r[4])
+        return best[0], best[1], best[2]
+    say("   bus errors on every setting and no clean frames. Nothing was sent.")
+    say("   Check: OBD pin 6 = CAN-H and pin 14 = CAN-L on the adapter side (not swapped),")
+    say("   pin 9 / pin 16 not connected, ignition ON, PCAN-View closed. Then run again.")
+    return None
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--interface", default="pcan")
     ap.add_argument("--channel", default="PCAN_USBBUS1")
-    ap.add_argument("--bitrate", type=int, default=500000)
+    ap.add_argument("--bitrate", type=int, default=0, help="force classic CAN at this rate")
     ap.add_argument("--fd", action="store_true", help="CAN FD, 500 kbit/s + 2 Mbit/s")
     ap.add_argument("--listen", type=float, default=10.0, help="seconds of listening first")
     ap.add_argument("--out", default=".")
@@ -208,15 +285,22 @@ def main():
         print(s)
         lines.append(s)
 
-    bus = open_bus(a)
+    say("Windrose OBD read-all  %s  %s" % (stamp, a.interface))
+    mode = choose_mode(a, say)
+    if mode is None:
+        with open(base + ".txt", "w", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
+        print("\nSaved %s.txt. Send it to Windrose." % base)
+        return 1
+    name, fd, br = mode
+    bus = open_bus(a, fd, br)
     log = can.ASCWriter(base + ".asc")
     r = Reader(bus, log)
     try:
-        say("Windrose OBD read-all  %s  %s %s" % (stamp, a.interface,
-            "CAN FD 500k/2M" if a.fd else "classic %d" % a.bitrate))
+        say("Using %s" % name)
         say("1. Listening %.0f s (nothing sent)" % a.listen)
         r.listen(a.listen)
-        say("   %d CAN IDs, %d frames" % (len(r.seen), sum(r.seen.values())))
+        say("   %d CAN IDs, %d frames, %d bus errors" % (len(r.seen), sum(r.seen.values()), r.errors))
 
         say("2. Who is there ($3E functional)")
         found = r.who_is_there()
@@ -228,6 +312,7 @@ def main():
 
         say("3. Identification and fault codes per ECU")
         for ecu in ecus:
+          try:
             name = KNOWN_ECUS.get(ecu, "unknown")
             first = r.ask(ecu, [0x22, 0xF1, 0x90], timeout=0.5)
             if first is None and ecu not in found:
@@ -249,6 +334,8 @@ def main():
                     say("     " + c)
             else:
                 say("   fault codes: " + show(body))
+          except can.CanError as exc:
+            say("   %02X: adapter error %s; going on" % (ecu, exc))
 
         say("4. J1939 requests")
         for pgn, label in J1939_ASKS.items():
@@ -258,7 +345,7 @@ def main():
 
         say("5. Listening 5 s more")
         r.listen(5)
-        say("Done. %d CAN IDs, %d frames in total." % (len(r.seen), sum(r.seen.values())))
+        say("Done. %d CAN IDs, %d frames, %d bus errors in total." % (len(r.seen), sum(r.seen.values()), r.errors))
     finally:
         log.stop()
         bus.shutdown()
