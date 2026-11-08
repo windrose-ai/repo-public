@@ -172,9 +172,15 @@ With Python already installed:
 
 ```text
 pip install python-can
-python obd_read_all.py            # PEAK, classic CAN 500 kbit/s
-python obd_read_all.py --fd       # if nothing answers: CAN FD 500k / 2M
+python obd_read_all.py            # PEAK, finds the bus setting itself
+python obd_read_all.py --fd       # force CAN FD 500k / 2M
 ```
+
+Before it sends anything, the script listens with the adapter in listen-only
+mode at classic 500k, CAN FD 500k/2M and classic 250k, and asks only at a
+setting that reads the bus without errors. A classic-CAN setting on a CAN FD
+bus shows up as a stream of bus errors, not as frames. If every setting gives
+bus errors, the script stops without sending and points at the wiring.
 
 ### Example with python-can and udsoncan
 
