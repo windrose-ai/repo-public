@@ -8,14 +8,14 @@ not by listening.
 ## Lesson from the field
 
 A dealer connected a CAN adapter to the OBD port of a truck that was stopped
-with a fault. They recorded in listen-only mode and sent the file in. The file
-came back empty.
+with a fault and sent in the recording. The file came back empty. Why it was
+empty was not established.
 
-An empty listen-only recording on the OBD port is what this design produces when
-nobody sends a request. On its own it says nothing about the condition of the
-truck. Before you record, decide whether you need to **listen** (J1939
-broadcast, see below) or to **ask** (UDS). For fault codes and the VIN, you
-have to ask.
+Because the gateway forwards little unprompted traffic to this plug, an empty
+or near-empty listen-only recording on the OBD port does not on its own say
+anything about the condition of the truck. Before you record, decide whether
+you need to **listen** (J1939 broadcast, see below) or to **ask** (UDS). For
+fault codes and the VIN, you have to ask.
 
 ## The connector
 
@@ -51,7 +51,7 @@ answer.
 
 | | |
 |---|---|
-| Bit rate used by Windrose for these reads | Classic CAN, 500 kbit/s |
+| Bit rate | Classic CAN, 500 kbit/s (Windrose's setting for these reads; if nothing answers, the segment may be CAN FD, 500 kbit/s arbitration and 2 Mbit/s data) |
 | Tester address | `0xF1` |
 | Physical request to one ECU | `18DA<ecu>F1` |
 | Response from that ECU | `18DAF1<ecu>` |
