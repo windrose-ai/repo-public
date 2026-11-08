@@ -57,19 +57,101 @@ answer.
 | Response from that ECU | `18DAF1<ecu>` |
 | Functional request (who is there?) | `18DBFFF1` |
 
-**Read-only services you may send**
+## What you can ask
+
+### Read-only UDS services
 
 | Service | What it does |
 |---|---|
-| `$10 01` / `$10 03` | Default / extended diagnostic session |
-| `$22` | ReadDataByIdentifier. Standard DIDs: `F190` VIN, `F187` spare part number, `F18C` serial number, `F193` hardware version, `F195` software version |
-| `$19` | ReadDTCInformation (fault codes). Read only |
+| `$10 01` / `$10 03` | Default / extended diagnostic session. Stay in `01` if the read works there |
+| `$22` | ReadDataByIdentifier (see the DID table) |
+| `$19` | ReadDTCInformation: fault codes and their status |
 | `$3E` | TesterPresent, keeps a read session open |
 
-**Do not send:** `$27` SecurityAccess, `$2E` write, `$2F` IO control, `$31`
-routines, `$11` reset, `$14` clear fault codes, `$34`–`$37` download or flash.
-If an ECU answers a read with a negative response such as `0x33` (security
-access denied), stop there. Do not try to unlock it.
+**Data identifiers for `$22`** (ISO 14229 standard identification DIDs)
+
+| DID | What comes back |
+|---|---|
+| `F190` | VIN |
+| `F187` | Spare part number |
+| `F18C` | ECU serial number |
+| `F193` | Hardware version |
+| `F195` | Software version |
+| `F1A1` | Vehicle configuration, where the ECU implements it |
+| `F010` | Cabin domain controller (CDCU) only: end-of-line option bitmap. Read only |
+
+Not every ECU implements every DID. A negative response `0x31` (request out
+of range) means that ECU does not have it. Move on.
+
+**Fault codes with `$19`**
+
+| Sub-function | Request | What comes back |
+|---|---|---|
+| `01` | `19 01 FF` | How many fault codes match the status mask |
+| `02` | `19 02 FF` | The fault codes and the status byte of each |
+| `0A` | `19 0A` | Every fault code the ECU supports, with status |
+| `04` | `19 04 <DTC> FF` | Freeze-frame (snapshot) data for one code, where stored |
+| `06` | `19 06 <DTC> FF` | Extended data (counters) for one code, where stored |
+
+Send the codes, with the ECU name and the VIN, to Windrose. Windrose maps them
+to descriptions; the code list is not published here.
+
+### Which ECUs to ask
+
+Send `18DBFFF1` (functional) first: every ECU that is awake answers, and the
+answers tell you which addresses are present. The main ones for service:
+
+| ECU | Address | Request ID | Response ID |
+|---|---|---|---|
+| Gateway | `FB` | `18DAFBF1` | `18DAF1FB` |
+| Powertrain domain controller (VDC) | `27` | `18DA27F1` | `18DAF127` |
+| Body domain controller (BDCU) | `21` | `18DA21F1` | `18DAF121` |
+| Cabin domain controller (CDCU) | `41` | `18DA41F1` | `18DAF141` |
+| Instrument cluster | `17` | `18DA17F1` | `18DAF117` |
+| Inverters 1–4 | `74`–`77` | `18DA74F1` … `18DA77F1` | `18DAF174` … `18DAF177` |
+| Transmission | `03` | `18DA03F1` | `18DAF103` |
+| Battery domain | `A6` | `18DAA6F1` | `18DAF1A6` |
+| HV distribution (PDU) | `78` | `18DA78F1` | `18DAF178` |
+| Brakes (EBS) | `0B` | `18DA0BF1` | `18DAF10B` |
+| Park brake (EPB) | `50` | `18DA50F1` | `18DAF150` |
+| Air suspension (ECAS) | `2F` | `18DA2FF1` | `18DAF12F` |
+| Smart junction box, upper / under | `54` / `59` | `18DA54F1` / `18DA59F1` | `18DAF154` / `18DAF159` |
+| HVAC | `19` | `18DA19F1` | `18DAF119` |
+
+Addresses come from the E700 communication matrix. Regional variants can
+differ; trust what the functional request returns on the truck in front of
+you. Bought-in brake, suspension and steering ECUs answer identification and
+fault-code reads; their deeper diagnostics belong to their suppliers.
+
+### Read-only J1939 requests
+
+On the same plug you can also send a J1939 Request (PGN 59904) from an
+off-board tool address (for example `0xF9`) for one of these:
+
+| Ask for | PGN | What comes back |
+|---|---|---|
+| DM1 | 65226 | Active fault codes (SPN, FMI, count) |
+| DM2 | 65227 | Previously active fault codes |
+| DM4 | 65229 | Freeze-frame parameters |
+| DM5 | 65230 | Diagnostic readiness |
+| DM6 | 65231 | Pending fault codes |
+| DM12 | 65236 | Emissions-related active fault codes |
+| VI | 65260 | VIN |
+| CI | 65259 | Component identification |
+| SOFT | 65242 | Software identification |
+
+**Never request DM3 (65228) or DM11 (65235).** Both clear fault codes.
+
+### Do not send
+
+`$27` SecurityAccess, `$2E` write, `$2F` IO control, `$31` routines, `$11`
+reset, `$14` clear fault codes, `$28` communication control, `$85` DTC setting
+control, `$34`–`$37` download or flash, J1939 DM3 / DM11, and any command or
+periodic frame. If an ECU answers a read with a negative response such as
+`0x33` (security access denied), stop there. Do not try to unlock it.
+
+None of the addresses above has yet been confirmed by a logged read on a
+customer truck. If you read one, Windrose would like the log.
 
 ### Example with python-can and udsoncan
 
