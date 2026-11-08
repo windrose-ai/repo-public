@@ -161,6 +161,15 @@ DIDs and fault codes from every ECU that answers, sends the J1939 requests, and
 saves an `.asc` log plus a text summary. Anything that is not a question is
 refused before it reaches the bus.
 
+On Windows, one line in PowerShell does everything, including a private copy
+of Python if the laptop has none (no administrator rights needed):
+
+```powershell
+irm https://raw.githubusercontent.com/windrose-ai/repo-public/main/tools/obd_read_all.ps1 | iex
+```
+
+With Python already installed:
+
 ```text
 pip install python-can
 python obd_read_all.py            # PEAK, classic CAN 500 kbit/s
